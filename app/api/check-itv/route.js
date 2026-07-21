@@ -18,9 +18,14 @@ function diasHasta(fecha) {
 }
 
 export async function GET(request) {
-  // Protección: si configuras CRON_SECRET, Vercel Cron envía este header automáticamente.
+  const { searchParams } = new URL(request.url);
+  const esPrueba = searchParams.get("test") === "1";
+
+  // Protección: si configuras CRON_SECRET, Vercel Cron envía este header
+  // automáticamente. El modo de prueba (?test=1) la salta a propósito para
+  // que puedas dispararla tú mismo desde el navegador mientras pruebas.
   const secret = process.env.CRON_SECRET;
-  if (secret) {
+  if (secret && !esPrueba) {
     const auth = request.headers.get("authorization");
     if (auth !== `Bearer ${secret}`) {
       return new Response("No autorizado", { status: 401 });
@@ -32,41 +37,58 @@ export async function GET(request) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
 
-  const { data: gruas } = await supabase.from("gruas").select("*");
-  const { data: itvs } = await supabase
-    .from("itv_historial")
-    .select("*")
-    .order("proxima_fecha", { ascending: false });
   const { data: subs } = await supabase.from("push_subscriptions").select("*");
 
-  const alertas = (gruas || [])
-    .map((g) => {
-      const ultimaItv = (itvs || []).find((i) => i.grua_id === g.id);
-      if (!ultimaItv) return null;
-      const dias = diasHasta(ultimaItv.proxima_fecha);
-      if (dias < 0 || dias > 7) return null;
-      return { ...g, proximaItv: ultimaItv.proxima_fecha, dias };
-    })
-    .filter(Boolean);
+  let payload;
 
-  if (alertas.length === 0 || !subs || subs.length === 0) {
-    return Response.json({ ok: true, avisos: 0, dispositivos: subs?.length || 0 });
+  if (esPrueba) {
+    // Modo de prueba: ignora fechas, manda siempre un aviso de prueba
+    // a todos los dispositivos activados, para comprobar que el push llega.
+    payload = JSON.stringify({
+      title: "🔔 Notificación de prueba",
+      body: `Prueba enviada a las ${new Date().toLocaleTimeString("es-ES")}`,
+      url: "/",
+    });
+  } else {
+    const { data: gruas } = await supabase.from("gruas").select("*");
+    const { data: itvs } = await supabase
+      .from("itv_historial")
+      .select("*")
+      .order("proxima_fecha", { ascending: false });
+
+    const alertas = (gruas || [])
+      .map((g) => {
+        const ultimaItv = (itvs || []).find((i) => i.grua_id === g.id);
+        if (!ultimaItv) return null;
+        const dias = diasHasta(ultimaItv.proxima_fecha);
+        if (dias < 0 || dias > 7) return null;
+        return { ...g, proximaItv: ultimaItv.proxima_fecha, dias };
+      })
+      .filter(Boolean);
+
+    if (alertas.length === 0 || !subs || subs.length === 0) {
+      return Response.json({ ok: true, avisos: 0, dispositivos: subs?.length || 0 });
+    }
+
+    const cuerpo =
+      alertas.length === 1
+        ? `${alertas[0].matricula} (${alertas[0].marca}) — ITV el ${new Date(
+            alertas[0].proximaItv
+          ).toLocaleDateString("es-ES")}`
+        : `${alertas.length} grúas con ITV próxima: ${alertas
+            .map((a) => a.matricula)
+            .join(", ")}`;
+
+    payload = JSON.stringify({
+      title: "⚠️ ITV próxima a vencer",
+      body: cuerpo,
+      url: "/",
+    });
   }
 
-  const cuerpo =
-    alertas.length === 1
-      ? `${alertas[0].matricula} (${alertas[0].marca}) — ITV el ${new Date(
-          alertas[0].proximaItv
-        ).toLocaleDateString("es-ES")}`
-      : `${alertas.length} grúas con ITV próxima: ${alertas
-          .map((a) => a.matricula)
-          .join(", ")}`;
-
-  const payload = JSON.stringify({
-    title: "⚠️ ITV próxima a vencer",
-    body: cuerpo,
-    url: "/",
-  });
+  if (!subs || subs.length === 0) {
+    return Response.json({ ok: true, enviados: 0, motivo: "No hay dispositivos activados todavía" });
+  }
 
   let enviados = 0;
   for (const sub of subs) {
@@ -89,5 +111,5 @@ export async function GET(request) {
     }
   }
 
-  return Response.json({ ok: true, avisos: alertas.length, enviados });
+  return Response.json({ ok: true, prueba: esPrueba, enviados });
 }
