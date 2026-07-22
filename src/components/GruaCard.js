@@ -5,6 +5,7 @@ const COLOR_TIPO = {
   "coche taller": "bg-blue-100 text-blue-700",
   "plataforma ligera": "bg-emerald-100 text-emerald-700",
   "plataforma pesada": "bg-amber-100 text-amber-700",
+  "patrol": "bg-green-100 text-green-700",
   "furgon de moto": "bg-purple-100 text-purple-700",
 };
 

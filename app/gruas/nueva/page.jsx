@@ -79,6 +79,7 @@ export default function NuevaGrua() {
               <option value="plataforma_ligera">Plataforma Ligera</option>
               <option value="plataforma_pesada">Plataforma Pesada</option>
               <option value="furgon_moto">Furgón de Moto</option>
+              <option value="patrol">Patrol</option>
             </select>
           </div>
           <div>

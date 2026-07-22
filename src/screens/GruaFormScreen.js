@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { crearGrua, actualizarGrua, obtenerGrua, eliminarGrua } from "../services/api";
 
-const TIPOS = ["coche taller", "plataforma ligera", "plataforma pesada", "furgon de moto"];
+const TIPOS = ["coche taller", "plataforma ligera", "plataforma pesada", "furgon de moto", "patrol"];
 
 export default function GruaFormScreen({ route, navigation }) {
   const gruaId = route.params?.id;

@@ -6,6 +6,7 @@ export const TIPOS = {
   plataforma_ligera: "Plataforma Ligera",
   plataforma_pesada: "Plataforma Pesada",
   furgon_moto: "Furgón de Moto",
+  patrol: "Patrol",
 };
 
 export default function GruaCard({ grua }) {
@@ -29,7 +30,7 @@ export default function GruaCard({ grua }) {
               ITV pronto
             </span>
           )}
-          {IconoTipo && <IconoTipo className="w-4 h-4 text-gray-400" />}
+          {IconoTipo && <IconoTipo className="w-10 h-10 text-gray-400" />}
         </div>
       </div>
       <p className="text-sm text-gray-500">
