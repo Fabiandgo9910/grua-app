@@ -21,7 +21,7 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const esPrueba = searchParams.get("test") === "1";
   const esDiag = searchParams.get("diag") === "1";
-  const VERSION = "v2-detalles-nocache";
+  const VERSION = "v3-nocache-fetch";
 
   const jsonSinCache = (body, status = 200) =>
     Response.json(body, {
@@ -42,7 +42,13 @@ export async function GET(request) {
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      global: {
+        // Evita que Next.js cachee las peticiones que hace supabase-js por debajo.
+        fetch: (url, options = {}) => fetch(url, { ...options, cache: "no-store" }),
+      },
+    }
   );
 
   // Modo diagnóstico: ?diag=1 — confirma variables de entorno y suscripciones,
@@ -64,7 +70,7 @@ export async function GET(request) {
     });
   }
 
-  const { data: subs } = await supabase.from("push_subscriptions").select("*");
+  const { data: subs, error: errorSubs } = await supabase.from("push_subscriptions").select("*");
 
   let payload;
 
@@ -119,6 +125,7 @@ export async function GET(request) {
       ok: true,
       enviados: 0,
       motivo: "No hay dispositivos activados todavía",
+      error_real: errorSubs?.message || null,
     });
   }
 
