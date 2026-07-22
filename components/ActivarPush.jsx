@@ -14,6 +14,23 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
+async function guardarSuscripcion(sub) {
+  const json = sub.toJSON();
+  const { error } = await supabase.from("push_subscriptions").upsert(
+    {
+      endpoint: json.endpoint,
+      p256dh: json.keys.p256dh,
+      auth: json.keys.auth,
+    },
+    { onConflict: "endpoint" }
+  );
+  if (error) {
+    console.error("Error guardando la suscripción en Supabase:", error.message);
+    return false;
+  }
+  return true;
+}
+
 export default function ActivarPush() {
   const [estado, setEstado] = useState("comprobando"); // comprobando | inactivo | activo | no-soportado
 
@@ -28,7 +45,15 @@ export default function ActivarPush() {
     }
     const reg = await navigator.serviceWorker.register("/sw.js");
     const sub = await reg.pushManager.getSubscription();
-    setEstado(sub ? "activo" : "inactivo");
+
+    if (sub && Notification.permission === "granted") {
+      // Ya había una suscripción local: la volvemos a guardar SIEMPRE en
+      // Supabase por si se había borrado ahí (desincronización cliente/servidor).
+      const ok = await guardarSuscripcion(sub);
+      setEstado(ok ? "activo" : "inactivo");
+    } else {
+      setEstado("inactivo");
+    }
   }
 
   async function activar() {
@@ -49,19 +74,11 @@ export default function ActivarPush() {
         });
       }
 
-      const json = sub.toJSON();
-      await supabase.from("push_subscriptions").upsert(
-        {
-          endpoint: json.endpoint,
-          p256dh: json.keys.p256dh,
-          auth: json.keys.auth,
-        },
-        { onConflict: "endpoint" }
-      );
-
-      setEstado("activo");
+      const ok = await guardarSuscripcion(sub);
+      setEstado(ok ? "activo" : "inactivo");
     } catch (e) {
       console.error("Error activando notificaciones push:", e);
+      setEstado("inactivo");
     }
   }
 
