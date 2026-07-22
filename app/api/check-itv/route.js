@@ -91,6 +91,7 @@ export async function GET(request) {
   }
 
   let enviados = 0;
+  const detalles = [];
   for (const sub of subs) {
     try {
       await webpush.sendNotification(
@@ -101,7 +102,15 @@ export async function GET(request) {
         payload
       );
       enviados++;
+      detalles.push({ id: sub.id, ok: true });
     } catch (err) {
+      detalles.push({
+        id: sub.id,
+        ok: false,
+        statusCode: err.statusCode || null,
+        mensaje: err.message,
+        body: err.body || null,
+      });
       // Si la suscripción ya no es válida (410/404), la borramos.
       if (err.statusCode === 410 || err.statusCode === 404) {
         await supabase.from("push_subscriptions").delete().eq("id", sub.id);
@@ -111,5 +120,5 @@ export async function GET(request) {
     }
   }
 
-  return Response.json({ ok: true, prueba: esPrueba, enviados });
+  return Response.json({ ok: true, prueba: esPrueba, enviados, detalles });
 }
