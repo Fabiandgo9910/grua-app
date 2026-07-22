@@ -94,7 +94,7 @@ export default function Dashboard() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
           <Image 
-            src="/ICON-192.png"
+            src="/icon-192.png"
             alt="Logo"
             width="192"
             height="192"
