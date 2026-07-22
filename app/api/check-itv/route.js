@@ -20,6 +20,13 @@ function diasHasta(fecha) {
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const esPrueba = searchParams.get("test") === "1";
+  const VERSION = "v2-detalles-nocache";
+
+  const jsonSinCache = (body, status = 200) =>
+    Response.json(body, {
+      status,
+      headers: { "Cache-Control": "no-store, no-cache, must-revalidate" },
+    });
 
   // Protección: si configuras CRON_SECRET, Vercel Cron envía este header
   // automáticamente. El modo de prueba (?test=1) la salta a propósito para
@@ -28,7 +35,7 @@ export async function GET(request) {
   if (secret && !esPrueba) {
     const auth = request.headers.get("authorization");
     if (auth !== `Bearer ${secret}`) {
-      return new Response("No autorizado", { status: 401 });
+      return jsonSinCache({ version: VERSION, error: "No autorizado" }, 401);
     }
   }
 
@@ -67,7 +74,7 @@ export async function GET(request) {
       .filter(Boolean);
 
     if (alertas.length === 0 || !subs || subs.length === 0) {
-      return Response.json({ ok: true, avisos: 0, dispositivos: subs?.length || 0 });
+      return jsonSinCache({ version: VERSION, ok: true, avisos: 0, dispositivos: subs?.length || 0 });
     }
 
     const cuerpo =
@@ -87,7 +94,12 @@ export async function GET(request) {
   }
 
   if (!subs || subs.length === 0) {
-    return Response.json({ ok: true, enviados: 0, motivo: "No hay dispositivos activados todavía" });
+    return jsonSinCache({
+      version: VERSION,
+      ok: true,
+      enviados: 0,
+      motivo: "No hay dispositivos activados todavía",
+    });
   }
 
   let enviados = 0;
@@ -120,5 +132,5 @@ export async function GET(request) {
     }
   }
 
-  return Response.json({ ok: true, prueba: esPrueba, enviados, detalles });
+  return jsonSinCache({ version: VERSION, ok: true, prueba: esPrueba, enviados, detalles });
 }
