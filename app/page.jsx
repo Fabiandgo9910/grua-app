@@ -92,8 +92,12 @@ export default function Dashboard() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
-            <IconoPlataformaGrua className="w-7 h-7 md:w-8 md:h-8 text-red-600" />
-            Asistencia del Toro
+          <img 
+            src="/ICON-192.png"
+            alt="Logo"
+            className="w-8 h-8"
+          />
+          Asistencia del Toro
           </h1>
           <Link
             href="/gruas/nueva"
@@ -104,7 +108,7 @@ export default function Dashboard() {
         </div>
 
         <ActivarPush />
-        <ProbarPush />
+        {/* <ProbarPush /> */}
 
         {alertas.length > 0 && (
           <div className="bg-amber-100 border border-amber-400 text-amber-800 rounded-lg p-4 mb-6">

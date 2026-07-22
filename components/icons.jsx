@@ -3,33 +3,29 @@ import { Wrench, Car, Truck, Bike } from "lucide-react";
 export function IconoPlataformaGrua({ className = "w-7 h-7" }) {
   return (
     <svg
-      viewBox="0 0 48 32"
+      viewBox="0 0 64 28"
       className={className}
       fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Cabina de la grúa */}
-      <path
-        d="M2 22V13C2 12.4477 2.44772 12 3 12H10L14 18H2Z"
-        fill="currentColor"
-      />
-      {/* Plataforma trasera */}
-      <rect x="13" y="16" width="30" height="4" rx="1" fill="currentColor" />
-      {/* Rampa trasera */}
-      <path d="M43 16L46 20H43V16Z" fill="currentColor" />
-      {/* Coche cargado encima de la plataforma */}
-      <path
-        d="M22 15.5C22 14.6716 22.6716 14 23.5 14H33.5C34.3284 14 35 14.6716 35 15.5V16H22V15.5Z"
-        fill="currentColor"
-      />
-      <path
-        d="M24 11C24 10.4477 24.4477 10 25 10H31.5C32.0523 10 32.5 10.4477 32.5 11V14H24V11Z"
-        fill="currentColor"
-      />
+      {/* Plataforma (chasis largo) */}
+      <path d="M2 20H60" />
+      <path d="M2 20V10H8L12 16H14" />
+      {/* Cabina del camión */}
+      <path d="M2 16V10" />
+      {/* Rampa trasera inclinada */}
+      <path d="M60 20L58 15" />
+      {/* Coche montado sobre la plataforma */}
+      <path d="M20 20V16C20 14.8954 20.8954 14 22 14H40C41.1046 14 42 14.8954 42 16V20" />
+      <path d="M24 14L27 9H36L38 14" />
       {/* Ruedas */}
-      <circle cx="7" cy="22" r="3" fill="currentColor" />
-      <circle cx="30" cy="22" r="3" fill="currentColor" />
-      <circle cx="39" cy="22" r="3" fill="currentColor" />
+      <circle cx="9" cy="21.5" r="2.2" />
+      <circle cx="28" cy="21.5" r="2.2" />
+      <circle cx="47" cy="21.5" r="2.2" />
     </svg>
   );
 }

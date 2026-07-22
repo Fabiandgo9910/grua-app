@@ -4,6 +4,33 @@ export const metadata = {
   title: "Asistencia del Toro",
   description: "Control de flota, mantenimientos, roturas e ITV",
   manifest: "/manifest.json",
+  // --- CONFIGURACIÓN DE ICONOS ---
+  icons: {
+    // Icono estándar (Favicon)
+    icon: [
+      { url: "/favicon.png", sizes: "any" },
+      { url: "/icon-192.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    // Icono para accesos directos en iOS (iPhone / iPad)
+    apple: [
+      { url: "/icon-192.png", sizes: "180x180", type: "image/png" },
+    ],
+    // Icono para pestañas fijadas en Safari
+    other: [
+      {
+        rel: "mask-icon",
+        url: "/safari-pinned-tab.svg",
+        color: "#2563eb",
+      },
+    ],
+  },
+  // Metadatos adicionales para dispositivos Apple
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Asistencia del Toro",
+  },
 };
 
 export const viewport = {
