@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import GruaCard from "@/components/GruaCard";
+import { IconoPlataformaGrua } from "@/components/icons";
 import ActivarPush from "@/components/ActivarPush";
 import ProbarPush from "@/components/ProbarPush";
 import { alertasHoy } from "@/lib/notificaciones";
@@ -90,8 +91,9 @@ export default function Dashboard() {
     <main className="min-h-screen p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-            🚛 Asistencia del Toro
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
+            <IconoPlataformaGrua className="w-7 h-7 md:w-8 md:h-8 text-red-600" />
+            Asistencia del Toro
           </h1>
           <Link
             href="/gruas/nueva"

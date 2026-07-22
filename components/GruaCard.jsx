@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ICONO_TIPO } from "@/components/icons";
 
 export const TIPOS = {
   coche_taller: "Coche Taller",
@@ -13,6 +14,7 @@ export default function GruaCard({ grua }) {
       ? Math.ceil((new Date(grua.proximaItv) - new Date()) / (1000 * 60 * 60 * 24))
       : null;
   const alertaItv = diasParaItv !== null && diasParaItv <= 7;
+  const IconoTipo = ICONO_TIPO[grua.tipo];
 
   return (
     <Link
@@ -21,11 +23,14 @@ export default function GruaCard({ grua }) {
     >
       <div className="flex justify-between items-start mb-2">
         <h2 className="text-lg font-bold text-gray-800">{grua.matricula}</h2>
-        {alertaItv && (
-          <span className="bg-red-100 text-red-700 text-xs font-medium px-2 py-1 rounded-full">
-            ITV pronto
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {alertaItv && (
+            <span className="bg-red-100 text-red-700 text-xs font-medium px-2 py-1 rounded-full">
+              ITV pronto
+            </span>
+          )}
+          {IconoTipo && <IconoTipo className="w-4 h-4 text-gray-400" />}
+        </div>
       </div>
       <p className="text-sm text-gray-500">
         {grua.marca}
