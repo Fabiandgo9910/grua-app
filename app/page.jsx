@@ -8,6 +8,7 @@ import { IconoPlataformaGrua } from "@/components/icons";
 import ActivarPush from "@/components/ActivarPush";
 import ProbarPush from "@/components/ProbarPush";
 import { alertasHoy } from "@/lib/notificaciones";
+import Image from 'next/image';
 
 function normalizar(texto) {
   return (texto || "")
@@ -92,9 +93,11 @@ export default function Dashboard() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
-          <img 
+          <Image 
             src="/ICON-192.png"
             alt="Logo"
+            width="192"
+            height="192"
             className="w-8 h-8"
           />
           Asistencia del Toro
