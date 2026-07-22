@@ -68,7 +68,7 @@ export default function Dashboard() {
         </div>
 
         <ActivarPush />
-        {/* <ProbarPush /> */}
+        <ProbarPush />
 
         {alertas.length > 0 && (
           <div className="bg-amber-100 border border-amber-400 text-amber-800 rounded-lg p-4 mb-6">

@@ -21,6 +21,7 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const esPrueba = searchParams.get("test") === "1";
   const esDiag = searchParams.get("diag") === "1";
+  const esManual = searchParams.get("manual") === "1";
   const VERSION = "v3-nocache-fetch";
 
   const jsonSinCache = (body, status = 200) =>
@@ -30,10 +31,11 @@ export async function GET(request) {
     });
 
   // Protección: si configuras CRON_SECRET, Vercel Cron envía este header
-  // automáticamente. El modo de prueba (?test=1) y el de diagnóstico (?diag=1)
-  // lo saltan a propósito para que puedas usarlos tú mismo desde el navegador.
+  // automáticamente. El modo de prueba (?test=1), diagnóstico (?diag=1) y
+  // manual (?manual=1) lo saltan a propósito para que puedas usarlos tú
+  // mismo desde el navegador.
   const secret = process.env.CRON_SECRET;
-  if (secret && !esPrueba && !esDiag) {
+  if (secret && !esPrueba && !esDiag && !esManual) {
     const auth = request.headers.get("authorization");
     if (auth !== `Bearer ${secret}`) {
       return jsonSinCache({ version: VERSION, error: "No autorizado" }, 401);
