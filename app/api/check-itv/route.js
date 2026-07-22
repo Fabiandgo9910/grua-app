@@ -20,6 +20,7 @@ function diasHasta(fecha) {
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const esPrueba = searchParams.get("test") === "1";
+  const esDiag = searchParams.get("diag") === "1";
   const VERSION = "v2-detalles-nocache";
 
   const jsonSinCache = (body, status = 200) =>
@@ -29,10 +30,10 @@ export async function GET(request) {
     });
 
   // Protección: si configuras CRON_SECRET, Vercel Cron envía este header
-  // automáticamente. El modo de prueba (?test=1) la salta a propósito para
-  // que puedas dispararla tú mismo desde el navegador mientras pruebas.
+  // automáticamente. El modo de prueba (?test=1) y el de diagnóstico (?diag=1)
+  // lo saltan a propósito para que puedas usarlos tú mismo desde el navegador.
   const secret = process.env.CRON_SECRET;
-  if (secret && !esPrueba) {
+  if (secret && !esPrueba && !esDiag) {
     const auth = request.headers.get("authorization");
     if (auth !== `Bearer ${secret}`) {
       return jsonSinCache({ version: VERSION, error: "No autorizado" }, 401);
@@ -43,6 +44,25 @@ export async function GET(request) {
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
+
+  // Modo diagnóstico: ?diag=1 — confirma variables de entorno y suscripciones,
+  // sin enviar ningún push.
+  if (searchParams.get("diag") === "1") {
+    const { data: subs, error } = await supabase.from("push_subscriptions").select("id, created_at");
+    return jsonSinCache({
+      version: VERSION,
+      variables_de_entorno: {
+        NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        NEXT_PUBLIC_VAPID_PUBLIC_KEY: !!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+        VAPID_PRIVATE_KEY: !!process.env.VAPID_PRIVATE_KEY,
+        CRON_SECRET: !!process.env.CRON_SECRET,
+      },
+      total_suscripciones: subs?.length ?? null,
+      suscripciones: subs,
+      error_supabase: error?.message || null,
+    });
+  }
 
   const { data: subs } = await supabase.from("push_subscriptions").select("*");
 
