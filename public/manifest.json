@@ -1,6 +1,6 @@
 {
-  "name": "Gestión de Grúas",
-  "short_name": "Grúas",
+  "name": "Asistencia del Toro",
+  "short_name": "Asist. Toro",
   "description": "Control de flota, mantenimientos, roturas e ITV",
   "start_url": "/",
   "display": "standalone",

@@ -9,6 +9,7 @@ export default function NuevaGrua() {
   const [form, setForm] = useState({
     matricula: "",
     marca: "",
+    modelo: "",
     tipo: "coche_taller",
     codigo: "",
   });
@@ -54,6 +55,15 @@ export default function NuevaGrua() {
               value={form.marca}
               onChange={handleChange}
               required
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
+            <input
+              name="modelo"
+              value={form.modelo}
+              onChange={handleChange}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

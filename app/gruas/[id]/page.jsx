@@ -53,6 +53,7 @@ export default function FichaGrua() {
       .update({
         matricula: form.matricula,
         marca: form.marca,
+        modelo: form.modelo,
         tipo: form.tipo,
         codigo: form.codigo,
       })
@@ -120,6 +121,7 @@ export default function FichaGrua() {
               <div className="space-y-2">
                 <Campo label="Matrícula" valor={grua.matricula} />
                 <Campo label="Marca" valor={grua.marca} />
+                <Campo label="Modelo" valor={grua.modelo || "—"} />
                 <Campo label="Tipo" valor={TIPOS[grua.tipo]} />
                 <Campo label="Código" valor={grua.codigo} />
                 <button
@@ -133,6 +135,7 @@ export default function FichaGrua() {
               <form onSubmit={guardarDatos} className="space-y-4">
                 <Input label="Matrícula" value={form.matricula} onChange={(v) => setForm({ ...form, matricula: v })} />
                 <Input label="Marca" value={form.marca} onChange={(v) => setForm({ ...form, marca: v })} />
+                <Input label="Modelo" value={form.modelo || ""} onChange={(v) => setForm({ ...form, modelo: v })} required={false} />
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
                   <select
@@ -180,14 +183,14 @@ function Campo({ label, valor }) {
   );
 }
 
-function Input({ label, value, onChange }) {
+function Input({ label, value, onChange, required = true }) {
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        required
+        required={required}
         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </div>
@@ -196,14 +199,16 @@ function Input({ label, value, onChange }) {
 
 function HistorialTaller({ gruaId, historial }) {
   const [tipo, setTipo] = useState("mantenimiento");
+  const [taller, setTaller] = useState("");
   const [observacion, setObservacion] = useState("");
   const [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10));
 
   async function agregar(e) {
     e.preventDefault();
     await supabase.from("historial_taller").insert([
-      { grua_id: gruaId, tipo, observacion, fecha },
+      { grua_id: gruaId, tipo, taller, observacion, fecha },
     ]);
+    setTaller("");
     setObservacion("");
   }
 
@@ -230,6 +235,12 @@ function HistorialTaller({ gruaId, historial }) {
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
           />
         </div>
+        <input
+          value={taller}
+          onChange={(e) => setTaller(e.target.value)}
+          placeholder="Taller donde se hizo"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+        />
         <textarea
           value={observacion}
           onChange={(e) => setObservacion(e.target.value)}
@@ -254,6 +265,9 @@ function HistorialTaller({ gruaId, historial }) {
               >
                 {h.tipo === "rotura" ? "Rotura" : "Mantenimiento"}
               </span>
+              {h.taller && (
+                <p className="text-xs text-gray-500 mt-1">Taller: {h.taller}</p>
+              )}
               <p className="text-sm mt-1">{h.observacion}</p>
               <p className="text-xs text-gray-400 mt-1">
                 {new Date(h.fecha).toLocaleDateString("es-ES")}

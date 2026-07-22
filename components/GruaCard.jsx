@@ -27,7 +27,10 @@ export default function GruaCard({ grua }) {
           </span>
         )}
       </div>
-      <p className="text-sm text-gray-500">{grua.marca}</p>
+      <p className="text-sm text-gray-500">
+        {grua.marca}
+        {grua.modelo ? ` ${grua.modelo}` : ""}
+      </p>
       <p className="text-sm text-gray-500">{TIPOS[grua.tipo] || grua.tipo}</p>
       <p className="text-xs text-gray-400 mt-2">Código: {grua.codigo}</p>
       {grua.proximaItv && (
