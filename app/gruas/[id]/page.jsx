@@ -281,6 +281,21 @@ function ControlItv({ gruaId, itvs }) {
     await supabase.from("itv_historial").insert([
       { grua_id: gruaId, fecha, proxima_fecha: proximaFecha },
     ]);
+
+    // Si la ITV que se acaba de registrar ya está a 7 días o menos,
+    // avisa a todos los dispositivos ahora mismo, sin esperar al cron diario.
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const objetivo = new Date(proximaFecha);
+    objetivo.setHours(0, 0, 0, 0);
+    const dias = Math.round((objetivo - hoy) / (1000 * 60 * 60 * 24));
+
+    if (dias >= 0 && dias <= 7) {
+      fetch("/api/check-itv?manual=1").catch((err) =>
+        console.error("No se pudo disparar el aviso inmediato:", err)
+      );
+    }
+
     setProximaFecha("");
   }
 
