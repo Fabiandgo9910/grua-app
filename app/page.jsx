@@ -36,10 +36,19 @@ export default function Dashboard() {
       .select("*")
       .order("proxima_fecha", { ascending: false });
 
+    const { data: tacografoData } = await supabase
+      .from("tacografo_historial")
+      .select("*")
+      .order("proxima_fecha", { ascending: false });
+
     const gruasConItv = (gruasData || []).map((g) => {
       const itvs = (itvData || []).filter((i) => i.grua_id === g.id);
-      const ultimaItv = itvs[0];
-      return { ...g, proximaItv: ultimaItv?.proxima_fecha ?? null };
+      const tacografos = (tacografoData || []).filter((t) => t.grua_id === g.id);
+      return {
+        ...g,
+        proximaItv: itvs[0]?.proxima_fecha ?? null,
+        proximaTacografo: tacografos[0]?.proxima_fecha ?? null,
+      };
     });
 
     setGruas(gruasConItv);
@@ -56,6 +65,7 @@ export default function Dashboard() {
       .channel("realtime-dashboard")
       .on("postgres_changes", { event: "*", schema: "public", table: "gruas" }, fetchGruas)
       .on("postgres_changes", { event: "*", schema: "public", table: "itv_historial" }, fetchGruas)
+      .on("postgres_changes", { event: "*", schema: "public", table: "tacografo_historial" }, fetchGruas)
       .on("postgres_changes", { event: "*", schema: "public", table: "historial_taller" }, fetchGruas)
       .subscribe();
 
@@ -64,13 +74,13 @@ export default function Dashboard() {
     };
   }, [fetchGruas]);
 
-  const idsConItvProxima = useMemo(() => new Set(alertas.map((a) => a.id)), [alertas]);
+  const idsConAlerta = useMemo(() => new Set(alertas.map((a) => a.gruaId)), [alertas]);
 
   const gruasFiltradas = useMemo(() => {
     let lista = gruas;
 
     if (soloItv) {
-      lista = lista.filter((g) => idsConItvProxima.has(g.id));
+      lista = lista.filter((g) => idsConAlerta.has(g.id));
     }
 
     const termino = normalizar(busqueda).trim();
@@ -86,7 +96,7 @@ export default function Dashboard() {
     }
 
     return lista;
-  }, [gruas, busqueda, soloItv, idsConItvProxima]);
+  }, [gruas, busqueda, soloItv, idsConAlerta]);
 
   return (
     <main className="min-h-screen p-4 md:p-8">
@@ -115,12 +125,12 @@ export default function Dashboard() {
 
         {alertas.length > 0 && (
           <div className="bg-amber-100 border border-amber-400 text-amber-800 rounded-lg p-4 mb-6">
-            <p className="font-semibold mb-1">⚠️ ITV próxima a vencer (7 días o menos):</p>
+            <p className="font-semibold mb-1">⚠️ ITV / Tacógrafo próximos a vencer (7 días o menos):</p>
             <ul className="text-sm space-y-1">
-              {alertas.map((g) => (
-                <li key={g.id}>
-                  {g.matricula} ({g.marca}) — ITV el{" "}
-                  {new Date(g.proximaItv).toLocaleDateString("es-ES")}
+              {alertas.map((a) => (
+                <li key={a.id}>
+                  {a.matricula} ({a.marca}) — {a.tipo} el{" "}
+                  {new Date(a.proximaFecha).toLocaleDateString("es-ES")}
                 </li>
               ))}
             </ul>
@@ -143,7 +153,7 @@ export default function Dashboard() {
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
-            ⚠️ Solo con ITV próxima
+            ⚠️ Solo con ITV/Tacógrafo próximos
           </button>
         </div>
 

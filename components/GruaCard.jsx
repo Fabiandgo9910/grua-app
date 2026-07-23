@@ -15,6 +15,13 @@ export default function GruaCard({ grua }) {
       ? Math.ceil((new Date(grua.proximaItv) - new Date()) / (1000 * 60 * 60 * 24))
       : null;
   const alertaItv = diasParaItv !== null && diasParaItv <= 7;
+
+  const diasParaTacografo =
+    grua.proximaTacografo != null
+      ? Math.ceil((new Date(grua.proximaTacografo) - new Date()) / (1000 * 60 * 60 * 24))
+      : null;
+  const alertaTacografo = diasParaTacografo !== null && diasParaTacografo <= 7;
+
   const IconoTipo = ICONO_TIPO[grua.tipo];
 
   return (
@@ -30,6 +37,11 @@ export default function GruaCard({ grua }) {
               ITV pronto
             </span>
           )}
+          {alertaTacografo && (
+            <span className="bg-orange-100 text-orange-700 text-xs font-medium px-2 py-1 rounded-full">
+              Tacógrafo pronto
+            </span>
+          )}
           {IconoTipo && <IconoTipo className="w-10 h-10 text-gray-400" />}
         </div>
       </div>
@@ -42,6 +54,11 @@ export default function GruaCard({ grua }) {
       {grua.proximaItv && (
         <p className="text-xs mt-2 text-gray-500">
           Próxima ITV: {new Date(grua.proximaItv).toLocaleDateString("es-ES")}
+        </p>
+      )}
+      {grua.proximaTacografo && (
+        <p className="text-xs mt-1 text-gray-500">
+          Próximo tacógrafo: {new Date(grua.proximaTacografo).toLocaleDateString("es-ES")}
         </p>
       )}
     </Link>

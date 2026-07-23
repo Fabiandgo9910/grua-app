@@ -22,7 +22,7 @@ export async function GET(request) {
   const esPrueba = searchParams.get("test") === "1";
   const esDiag = searchParams.get("diag") === "1";
   const esManual = searchParams.get("manual") === "1";
-  const VERSION = "v3-nocache-fetch";
+  const VERSION = "v4-tacografo";
 
   const jsonSinCache = (body, status = 200) =>
     Response.json(body, {
@@ -90,16 +90,32 @@ export async function GET(request) {
       .from("itv_historial")
       .select("*")
       .order("proxima_fecha", { ascending: false });
+    const { data: tacografos } = await supabase
+      .from("tacografo_historial")
+      .select("*")
+      .order("proxima_fecha", { ascending: false });
 
-    const alertas = (gruas || [])
+    const alertasItv = (gruas || [])
       .map((g) => {
         const ultimaItv = (itvs || []).find((i) => i.grua_id === g.id);
         if (!ultimaItv) return null;
         const dias = diasHasta(ultimaItv.proxima_fecha);
         if (dias < 0 || dias > 7) return null;
-        return { ...g, proximaItv: ultimaItv.proxima_fecha, dias };
+        return { ...g, proximaFecha: ultimaItv.proxima_fecha, tipo: "ITV" };
       })
       .filter(Boolean);
+
+    const alertasTacografo = (gruas || [])
+      .map((g) => {
+        const ultimo = (tacografos || []).find((t) => t.grua_id === g.id);
+        if (!ultimo) return null;
+        const dias = diasHasta(ultimo.proxima_fecha);
+        if (dias < 0 || dias > 7) return null;
+        return { ...g, proximaFecha: ultimo.proxima_fecha, tipo: "Tacógrafo" };
+      })
+      .filter(Boolean);
+
+    const alertas = [...alertasItv, ...alertasTacografo];
 
     if (alertas.length === 0 || !subs || subs.length === 0) {
       return jsonSinCache({ version: VERSION, ok: true, avisos: 0, dispositivos: subs?.length || 0 });
@@ -107,15 +123,15 @@ export async function GET(request) {
 
     const cuerpo =
       alertas.length === 1
-        ? `${alertas[0].matricula} (${alertas[0].marca}) — ITV el ${new Date(
-            alertas[0].proximaItv
+        ? `${alertas[0].matricula} (${alertas[0].marca}) — ${alertas[0].tipo} el ${new Date(
+            alertas[0].proximaFecha
           ).toLocaleDateString("es-ES")}`
-        : `${alertas.length} grúas con ITV próxima: ${alertas
-            .map((a) => a.matricula)
+        : `${alertas.length} avisos próximos: ${alertas
+            .map((a) => `${a.matricula} (${a.tipo})`)
             .join(", ")}`;
 
     payload = JSON.stringify({
-      title: "⚠️ ITV próxima a vencer",
+      title: "⚠️ ITV / Tacógrafo próximo a vencer",
       body: cuerpo,
       url: "/",
     });
